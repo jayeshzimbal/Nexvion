@@ -2,6 +2,17 @@ provider "aws" {
   region = "ap-south-1"
 }
 
+# Dynamically fetch the latest Amazon Linux 2023 AMI for ap-south-1
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-2023*-x86_64"]
+  }
+}
+
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
@@ -20,8 +31,8 @@ resource "aws_subnet" "public" {
 }
 
 resource "aws_instance" "web" {
-  ami           = "ami-0c55b159cbfafe1f0" # Example Amazon Linux 2 AMI
-  instance_type = "t2.micro"
+  ami           = data.aws_ami.amazon_linux.id
+  instance_type = "t3.micro"
   subnet_id     = aws_subnet.public.id
   tags = {
     Name = "nexvion-devops-server"

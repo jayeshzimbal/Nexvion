@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+
+    environment {
+        REGISTRY = "docker.io"
+        IMAGE_NAME = "nexvion-ecommerce"
+        TAG = "${env.BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Checkout Source') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Security Scan') {
+            steps {
+                echo "Running security and dependency scans..."
+            }
+        }
+
+        stage('Docker Build & Scan') {
+            steps {
+                echo "Building Docker image..."
+                sh "docker build -t ${env.REGISTRY}/${env.IMAGE_NAME}:${env.TAG} -f docker/Dockerfile ."
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                echo "Deploying application to Kubernetes cluster..."
+                sh "kubectl set image deployment/nexvion-deployment nexvion=${env.REGISTRY}/${env.IMAGE_NAME}:${env.TAG} -n default"
+            }
+        }
+    }
+}

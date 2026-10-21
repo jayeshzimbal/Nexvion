@@ -1,19 +1,25 @@
----
-- hosts: all
-  become: true
+- hosts: webservers
+  become: yes
   tasks:
-    - name: Update apt packages
-      apt:
+    - name: Ensure package manager cache is updated (DNF)
+      ansible.builtin.dnf:
         update_cache: yes
-      when: ansible_os_family == "Debian"
+      when: ansible_os_family == "RedHat"
 
-    - name: Install Docker
-      package:
-        name: docker.io
+    - name: Install Docker on Amazon Linux
+      ansible.builtin.dnf:
+        name: docker
         state: present
+      when: ansible_os_family == "RedHat"
 
     - name: Start and enable Docker service
-      service:
+      ansible.builtin.service:
         name: docker
         state: started
-        enabled: true
+        enabled: yes
+
+    - name: Add ec2-user to docker group
+      ansible.builtin.user:
+        name: ec2-user
+        groups: docker
+        append: yes

@@ -27,10 +27,12 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Deploy to Docker') {
             steps {
-                echo "Deploying application to Kubernetes cluster..."
-                sh "kubectl set image deployment/nexvion-deployment nexvion=${env.REGISTRY}/${env.IMAGE_NAME}:${env.TAG} -n default"
+                echo "Deploying application to Docker..."
+                sh "docker stop docker-nexvion-app-1 || true"
+                sh "docker rm docker-nexvion-app-1 || true"
+                sh "docker run -d --name docker-nexvion-app-1 -p 8090:80 ${env.REGISTRY}/${env.IMAGE_NAME}:${env.TAG}"
             }
         }
     }

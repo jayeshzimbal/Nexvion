@@ -2,19 +2,10 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
   - job_name: 'nexvion-app'
     static_configs:
-      - targets: ['localhost:8080']
-EOF
-
-cat << 'EOF' > monitoring/grafana/dashboards.yaml
-apiVersion: 1
-providers:
-  - name: 'default'
-    orgId: 1
-    folder: ''
-    type: file
-    disableDeletion: false
-    editable: true
-    options:
-      path: /var/lib/grafana/dashboards
+      - targets: ['localhost:8090']  # Your Nexvion app container port (or 8080 if pointing to Jenkins/App)
